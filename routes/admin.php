@@ -78,6 +78,13 @@ Route::middleware('admin')->group(function () {
         Route::post('phase/status/{id}', 'updatePhaseStatus')->name('phase.status');
     });
 
+    Route::controller('LotteryController')->name('tickets.')->prefix('tickets')->group(function () {
+        Route::get('/', 'ticketIndex')->name('index');
+        Route::get('create/{id?}', 'ticketCreate')->name('create');
+        Route::post('store/{id?}', 'ticketStore')->name('store');
+        Route::get('phase/all', 'ticketPhases')->name('phase.all');
+    });
+
     //manage draw lottery
     Route::controller('DrawController')->name('draw.')->prefix('draw')->group(function () {
         Route::get('pending', 'pendingDraw')->name('pending');
@@ -270,7 +277,7 @@ Route::middleware('admin')->group(function () {
         Route::get('maintenance-mode', 'maintenanceMode')->name('maintenance.mode');
         Route::post('maintenance-mode', 'maintenanceModeSubmit');
 
-        
+
     });
 
 
