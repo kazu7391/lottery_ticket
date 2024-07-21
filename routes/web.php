@@ -40,6 +40,10 @@ Route::controller('SiteController')->group(function () {
     Route::get('lottery-tickets', 'lotteryTickets')->name('lottery.tickets');
     Route::get('{slug}/{id}/play', 'playLottery')->name('lottery.play');
 
+    Route::get('tickets', 'getTickets')->name('tickets');
+    Route::get('ticket', 'getTicket')->name('ticket.single');
+    Route::get('{slug}/{id}/ticket/play', 'playTicket')->name('ticket.play');
+
     Route::get('results', 'results')->name('results');
     Route::get('blogs', 'blogs')->name('blogs');
     Route::get('faqs', 'faqs')->name('faqs');

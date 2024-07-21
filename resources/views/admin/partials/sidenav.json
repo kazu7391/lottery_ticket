@@ -66,6 +66,34 @@
             }
         ]
     },
+    "manage_ticket": {
+        "title": "Manage Ticket",
+        "icon": "las la-ticket-alt",
+        "menu_active": "admin.tickets*",
+        "submenu": [
+            {
+                "keyword": [
+                    "Manage Ticket",
+                    "Tickets"
+                ],
+                "title": "Tickets",
+                "route_name": "admin.tickets.index",
+                "menu_active": [
+                    "admin.tickets.index",
+                    "admin.tickets.create"
+                ]
+            },
+            {
+                "keyword": [
+                    "Phases",
+                    "Ticket Phase"
+                ],
+                "title": "Ticket Phases",
+                "route_name": "admin.tickets.phase.all",
+                "menu_active": "admin.tickets.phase.all"
+            }
+        ]
+    },
     "coin_request": {
         "keyword": [
             "Coin Request",
