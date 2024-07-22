@@ -53,7 +53,46 @@ class SiteController extends Controller
         }])->active()->whereHas('activePhase')->findOrFail($id);
 
         $pageTitle = 'Play ' . $lottery->name;
-        return view('Template::lottery.play', compact('pageTitle', 'lottery'));
+        $tempFolder = $lottery->is_ticket ? 'ticket' : 'lottery';
+
+        return view('Template::' . $tempFolder . '.play', compact('pageTitle', 'lottery'));
+    }
+
+    public function getTicket(Request $request)
+    {
+        $lottery = Lottery::where('id', $request->lottery_id)->first();
+        if (!$lottery) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Lottery not found'
+            ]);
+        }
+
+        if ($lottery->ball_start_from) {
+            $normalBallLimit = $lottery->no_of_ball + 1;
+        } else {
+            $normalBallLimit = $lottery->no_of_ball;
+        }
+
+        $pickedNumbers = [];
+        if(!$lottery->activePhase->pickedTickets->isEmpty()) {
+            foreach($lottery->activePhase->pickedTickets as $pickedTickets) {
+                if(!empty($pickedTickets->normal_balls)) {
+                    foreach ($pickedTickets->normal_balls as $ball) {
+                        $pickedNumbers[] = $ball;
+                    }
+                }
+            }
+        }
+
+        $lotteryNumber = 1;
+        $html = view('Template::ticket.single_ticket', compact('lottery', 'lotteryNumber', 'normalBallLimit', 'pickedNumbers'))->render();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'success',
+            'html' => $html
+        ]);
     }
 
     public function getSingleTicket(Request $request)

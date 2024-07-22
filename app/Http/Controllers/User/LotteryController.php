@@ -45,7 +45,11 @@ class LotteryController extends Controller
             $query->where('status', Status::ENABLE);
         }])->whereHas('activePhase')->findOrFail($id);
 
-        $this->pickingValidation($lottery, $request);
+        if($lottery->is_ticket) {
+            $this->pickingTicketValidation($lottery, $request);
+        } else {
+            $this->pickingValidation($lottery, $request);
+        }
 
         if ($request->phase_id != @$lottery->activePhase->id) {
             $notify[] = ['error', 'The phase is invalid, please try an active phase'];
@@ -201,6 +205,29 @@ class LotteryController extends Controller
             $multiDrawOptionValidation = ['multi_draw_option_id' => 'required|integer|in:' . implode(',', $optionIds)];
             $validation                = array_merge($validation,  $multiDrawOptionValidation);
         }
+
+        $request->validate($validation, $message);
+    }
+
+    private function pickingTicketValidation($lottery, $request)
+    {
+        $maximumNormalBallNumber = (int) $lottery->ball_end;
+
+        $validation = [
+            'phase_id'               => 'required',
+            'payment_via'            => 'required|in:balance,direct',
+            'entry_type'             => 'nullable|in:1,2',
+            'ticket.*.normal_ball'   => 'required|array',
+            'ticket.*.normal_ball.*' => 'required|numeric|between:' . $lottery->ball_start_from . ',' . $maximumNormalBallNumber,
+        ];
+
+        $message = [
+            'phase_id.required'               => 'The phase field is required',
+            'payment_via.in'                  => 'The payment via should be in balance or direct',
+            'ticket.*.normal_ball.required'   => 'Each ticket should have ' . $lottery->total_picking_ball . ' normal balls selected',
+            'ticket.*.normal_ball.size'       => 'The normal ball must be ' . $lottery->total_picking_ball,
+            'ticket.*.normal_ball.*.between'  => 'The normal ball must be between ' . $lottery->ball_start_from . ' and ' . $maximumNormalBallNumber
+        ];
 
         $request->validate($validation, $message);
     }

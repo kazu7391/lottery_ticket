@@ -41,7 +41,7 @@ Route::controller('SiteController')->group(function () {
     Route::get('{slug}/{id}/play', 'playLottery')->name('lottery.play');
 
     Route::get('tickets', 'getTickets')->name('tickets');
-    Route::get('ticket', 'getTicket')->name('ticket.single');
+    Route::get('ticket_single', 'getTicket')->name('ticket.single');
     Route::get('{slug}/{id}/ticket/play', 'playTicket')->name('ticket.play');
 
     Route::get('results', 'results')->name('results');
