@@ -10,8 +10,20 @@
                         <div class="row">
                             <div class="col-xl-4 col-lg-12 col-md-6">
                                 <div class="form-group">
-                                    <label>@lang('Image')</label>
-                                    <x-image-uploader image="{{ @$lottery->image }}" class="w-100" type="lottery" :required="@$lottery ? false : true" />
+                                    <div class="image-upload">
+                                        <div class="thumb">
+                                            <div class="avatar-preview">
+                                                <div class="profilePicPreview" style="background-image: url({{ getImage(getFilePath('lottery') . '/' . @$lottery->image, getFileSize('lottery')) }})">
+                                                    <button class="remove-image" type="button"><i class="fa fa-times"></i></button>
+                                                </div>
+                                            </div>
+                                            <div class="avatar-edit">
+                                                <input accept=".png, .jpg, .jpeg" class="profilePicUpload d-none" id="lotteryImage" name="image" type="file">
+                                                <label class="bg--success mt-2" for="lotteryImage">@lang('Upload Image')</label>
+                                                <small class="mt-2  ">@lang('Supported files'): <b>@lang('jpeg'), @lang('jpg'), @lang('png').</b> @lang('Image will be resized into ') {{ getFileSize('lottery') . 'px' }} </small>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-xl-8 col-lg-12 col-md-6">
@@ -30,20 +42,20 @@
                                             <label>@lang('Price')</label>
                                             <div class="input-group">
                                                 <input class="form-control" name="price" required step="any" type="number" value="{{ $amount > 0 ? getAmount($amount) : '' }}">
-                                                <span class="input-group-text">{{ __(gs('cur_text')) }}</span>
+                                                <span class="input-group-text">{{ __($general->cur_text) }}</span>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-xl-6 col-lg-6">
                                         <div class="form-group ">
                                             <label>@lang('No. Of Balls')</label>
-                                            <input class="form-control" min="1" name="no_of_ball" required type="number" value="{{ old('no_of_ball', @$lottery->no_of_ball) }}">
+                                            <input class="form-control" min="1" id="no_of_ball"  name="no_of_ball" required type="number" value="{{ old('no_of_ball', @$lottery->no_of_ball) }}">
                                         </div>
                                     </div>
                                     <div class="col-xl-6 col-lg-6">
                                         <div class="form-group ">
-                                            <label>@lang('Ball Start From')</label>
-                                            <input class="form-control" min="0" name="ball_start_from" required type="number" value="{{ old('ball_start_from', @$lottery->ball_start_from) }}">
+                                            <label>@lang('Ball Start From')  <i class="las la-info-circle text--primary" title="@lang('The ball starts from must be 0 or 1')"></i> </label>
+                                            <input class="form-control" min="0" name="ball_start_from" required type="text" value="{{ old('ball_start_from', @$lottery->ball_start_from) }}">
                                         </div>
                                     </div>
                                     <div class="col-xl-6 col-lg-6">
@@ -88,8 +100,28 @@
                                     <label>@lang('Special Winner Prize')</label>
                                     <div class="input-group">
                                         <input class="form-control specialBallInputs" name="special_winning_prize" required step="any" type="number" value="{{ $special_winning_prize > 0 ? getAmount($special_winning_prize) : '' }}">
-                                        <span class="input-group-text">{{ __(gs('cur_text')) }}</span>
+                                        <span class="input-group-text">{{ __($general->cur_text) }}</span>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input @checked(old('has_power_ball', @$lottery->has_power_ball)) class="form-check-input" id="hasPowerBall" name="has_power_ball" type="checkbox" value="1">
+                                    <label class="form-check-label" for="hasPowerBall">@lang('Has Power Ball')</label>
+                                </div>
+                            </div>
+                            <div class="col-xl-4">
+                                <div class="form-group">
+                                    <label>@lang('No. Of Power Ball')</label>
+                                    <input class="form-control powerBallInputs" min="0" name="no_of_pw_ball" type="number" value="{{ old('no_of_pw_ball', @$lottery->no_of_pw_ball) }}">
+                                </div>
+                            </div>
+                            <div class="col-xl-4">
+                                <div class="form-group">
+                                    <label>@lang('Power Ball Start From')</label>
+                                    <input class="form-control powerBallInputs" min="0" name="pw_ball_start_from" placeholder="" type="number" value="{{ old('pw_ball_start_from', @$lottery->pw_ball_start_from) }}">
                                 </div>
                             </div>
                         </div>
@@ -193,9 +225,9 @@
 
                                                             <button class="input-group-text ms-2 btn icon-btn @if ($loop->first) btn--success addBtn @else btn--danger removeBtn @endif" data-type="{{ $lottery->phase_type }}" type="button">
                                                                 @if ($loop->first)
-                                                                    <i class="las la-plus me-0"></i>
+                                                                    <i class="las la-plus"></i>
                                                                 @else
-                                                                    <i class="las la-times me-0"></i>
+                                                                    <i class="las la-times"></i>
                                                                 @endif
                                                             </button>
                                                         </div>
@@ -235,6 +267,35 @@
         (function($) {
             "use strict";
 
+            let hasPowerBall = "{{ @$lottery->has_power_ball ?? 0 }}" * 1;
+
+            @if (old('has_power_ball'))
+                hasPowerBall = 1;
+            @endif
+
+            updatePowerBallsDOM(hasPowerBall);
+
+            $('[name=has_power_ball]').on('click', function() {
+                let condition = $(this).is(':checked') ? true : false;
+                updatePowerBallsDOM(condition);
+            });
+
+            function updatePowerBallsDOM(condition) {
+                let powerBallInputs = $('.powerBallInputs');
+                if (condition == true) {
+                    powerBallInputs.prop('disabled', false);
+                    powerBallInputs.attr('required', true);
+                    powerBallInputs.siblings('label').addClass('required');
+                    $('[name=pw_ball_start_from]').attr('placeholder', "@lang('Enter 0 or 1')");
+                } else {
+                    powerBallInputs.val('');
+                    powerBallInputs.prop('disabled', true);
+                    powerBallInputs.removeAttr('required');
+                    powerBallInputs.siblings('label').removeClass('required');
+                    $('[name=pw_ball_start_from]').attr('placeholder', "");
+                }
+            }
+
             let hasSpecialBalls = "{{ @$lottery->has_special_balls ?? 0 }}" * 1;
             @if (old('has_special_balls'))
                 hasSpecialBalls = 1;
@@ -258,39 +319,6 @@
                 }
             }
 
-            $('[name=no_of_ball]').on('change', function () {
-                let value = $(this).val();
-                $('[name=total_picking_ball]').val(value);
-
-                let ballNumber = parseInt(value);
-                let ballStartText = '';
-                let ballEndText = 10;
-                if(ballNumber > 1) {
-                    for (let i = 0; i < ballNumber - 1; i++) {
-                        ballStartText += '0';
-                        ballEndText *= 10;
-                    }
-                    ballStartText += '1';
-                    ballEndText = ballEndText - 1;
-                } else {
-                    ballStartText = '1';
-                    ballEndText = '9';
-                }
-                $('[name=ball_start_from]').val(ballStartText);
-                $('.sp-ball-start-from').html(ballStartText);
-                $('[name=ball_end]').val(ballEndText);
-                let ballDisableVal = $('[name=ball_disable_range]').val();
-                if(ballDisableVal === '') {
-                    $('[name=ball_start]').val(ballStartText);
-                }
-            });
-
-            $('[name=ball_disable_range]').on('keyup', function () {
-                let ballDisableVal = $('[name=ball_disable_range]').val();
-                let ballDisableNumb = parseInt(ballDisableVal);
-                $('[name=ball_start]').val(ballDisableNumb + 1);
-            });
-
             let phaseDayTimeDiv = $('.phaseDayTimeDiv');
             $('[name=auto_creation_phase]').on('click', function() {
                 phaseDayTimeDiv.find('[name=phase_type]').prop('checked', false);
@@ -306,14 +334,24 @@
                 phaseDayTimeDiv.find('.parentDiv').remove();
                 phaseDayTimeDiv.append(weekMonthField($(this).val(), 'add'));
 
-                initClockPicker();
+                $('.clockpicker').clockpicker({
+                    placement: 'top',
+                    align: 'left',
+                    donetext: 'Done',
+                    autoclose: true,
+                });
             });
 
             $(document).on('click', '.addBtn', function() {
                 let type = $(this).data('type');
                 phaseDayTimeDiv.append(weekMonthField(type));
 
-                initClockPicker();
+                $('.clockpicker').clockpicker({
+                    placement: 'top',
+                    align: 'left',
+                    donetext: 'Done',
+                    autoclose: true,
+                });
             });
 
             $(document).on('click', '.removeBtn', function() {
@@ -332,7 +370,7 @@
                 } else {
                     buttonHtml = `
                     <button type="button" data-type="${type}" class="input-group-text ms-2 btn icon-btn btn--success addBtn">
-                        <i class="las la-plus me-0"></i>
+                        <i class="las la-plus"></i>
                     </button>
                     `;
                 }
@@ -377,15 +415,45 @@
                 return html;
             }
 
-            function initClockPicker() {
-                $('.clockpicker').clockpicker({
-                    placement: 'top',
-                    align: 'left',
-                    donetext: 'Done',
-                    autoclose: true,
-                });
-            }
+            $('.clockpicker').clockpicker({
+                placement: 'top',
+                align: 'left',
+                donetext: 'Done',
+                autoclose: true,
+            });
 
+            $('[name=no_of_ball]').on('change', function () {
+                let value = $(this).val();
+                $('[name=total_picking_ball]').val(value);
+
+                let ballNumber = parseInt(value);
+                let ballStartText = '';
+                let ballEndText = 10;
+                if(ballNumber > 1) {
+                    for (let i = 0; i < ballNumber - 1; i++) {
+                        ballStartText += '0';
+                        ballEndText *= 10;
+                    }
+                    ballStartText += '1';
+                    ballEndText = ballEndText - 1;
+                } else {
+                    ballStartText = '1';
+                    ballEndText = '9';
+                }
+                $('[name=ball_start_from]').val(ballStartText);
+                $('.sp-ball-start-from').html(ballStartText);
+                $('[name=ball_end]').val(ballEndText);
+                let ballDisableVal = $('[name=ball_disable_range]').val();
+                if(ballDisableVal === '') {
+                    $('[name=ball_start]').val(ballStartText);
+                }
+            });
+
+            $('[name=ball_disable_range]').on('keyup', function () {
+                let ballDisableVal = $('[name=ball_disable_range]').val();
+                let ballDisableNumb = parseInt(ballDisableVal);
+                $('[name=ball_start]').val(ballDisableNumb + 1);
+            });
         })(jQuery);
     </script>
 @endpush
@@ -395,10 +463,6 @@
         button.icon-btn {
             border-top-left-radius: 3px !important;
             border-bottom-left-radius: 3px !important;
-        }
-
-        .popover{
-            position: absolute;
         }
     </style>
 @endpush

@@ -16,7 +16,7 @@
                             <input name="winning[{{ $key }}][lottery_id]" type="hidden" value="{{ $lottery->id }}">
                             <div class="parent">
                                 <div class="row">
-                                    <div class="col-md-3">
+                                    <div class="col-md-3 @if($lottery->is_ticket) d-none @endif">
                                         <div class="form-group">
                                             <label>@lang('No. Of Power Ball')</label>
                                             <input class="form-control" name="winning[{{ $key }}][power_ball]" readonly type="number" value="{{ $winningCombination['power_ball'] }}" required>

@@ -26,7 +26,7 @@
                                             </div>
 
                                         </td>
-                                        <td>{{ showAmount($lottery->price) }} {{ __($general->cur_text) }}</td>
+                                        <td>{{ showAmount($lottery->price) }}</td>
                                         <td>
                                             @php
                                                 echo $lottery->statusBadge;
