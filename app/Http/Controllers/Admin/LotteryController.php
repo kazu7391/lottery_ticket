@@ -81,7 +81,7 @@ class LotteryController extends Controller
         $lottery->auto_creation_phase      = $request->auto_creation_phase ? Status::YES : Status::NO;
         $lottery->has_special_balls        = $request->has_special_balls ? Status::YES : Status::NO;
         $lottery->special_winning_ball     = $request->special_winning_ball;
-        $lottery->special_winning_prize    = $request->special_winning_prize;
+        $lottery->special_winning_prize    = $request->special_winning_prize ?? 0;
 
         if ($request->hasFile('image')) {
             try {
