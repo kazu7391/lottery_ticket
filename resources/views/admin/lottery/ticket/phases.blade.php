@@ -147,6 +147,10 @@
 
             initDateRangePicker();
 
+            $('.phase-datePicker').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('YYYY-MM-DD hh:mm A'));
+            });
+
             $('.addBtn').on('click', function() {
                 let modal = $('#phaseModal');
                 let data = $(this).data();
