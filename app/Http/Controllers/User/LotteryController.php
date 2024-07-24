@@ -39,17 +39,91 @@ class LotteryController extends Controller
         return view('Template::user.lottery.winning_history', compact('pageTitle', 'winners'));
     }
 
+    public function pickTicket(Request $request, $id)
+    {
+        $lottery = Lottery::active()->with(['activePhase', 'multiDrawOptions' => function ($query) {
+            $query->where('status', Status::ENABLE);
+        }])->whereHas('activePhase')->findOrFail($id);
+
+        $this->pickingTicketValidation($lottery, $request);
+
+        if ($request->phase_id != @$lottery->activePhase->id) {
+            $notify[] = ['error', 'The phase is invalid, please try an active phase'];
+            return back()->withNotify($notify);
+        }
+
+        $user         = auth()->user()->load('referrer');
+        $option       = null;
+        $discount     = 0;
+
+        $ticketCount = 0;
+        if(!empty($request->ticket)) {
+            foreach($request->ticket as $numbers) {
+                if(!empty($numbers['normal_ball'])) {
+                    $ticketCount = count($numbers['normal_ball']);
+                }
+            }
+        }
+        $totalAmount  = $ticketAmount = $lottery->price * $ticketCount;
+
+        if ($request->payment_via == 'balance' && $user->balance < $totalAmount) {
+            $notify[] = ['error', 'You don\'t have sufficient coin'];
+            return back()->withNotify($notify);
+        }
+
+        $userPick               = new UserPick();
+        $userPick->user_id      = $user->id;
+        $userPick->phase_id     = $lottery->activePhase->id;
+        $userPick->amount       = $ticketAmount;
+        $userPick->save();
+
+        $this->insertPickedTickets($request, $userPick);
+
+        if ($request->payment_via == 'balance') {
+            $user->balance -= $totalAmount;
+            $user->save();
+
+            $transaction               = new Transaction();
+            $transaction->user_id      = $user->id;
+            $transaction->amount       = $totalAmount;
+            $transaction->post_balance = $user->balance;
+            $transaction->charge       = 0;
+            $transaction->trx_type     = '-';
+            $transaction->details      = 'Payment for purchase ticket';
+            $transaction->trx          = getTrx();
+            $transaction->remark       = 'payment';
+            $transaction->save();
+
+            $userPick->status = Status::PAYMENT_SUCCESS;
+            $userPick->save();
+
+            notify($user, 'PURCHASE_COMPLETE', [
+                'trx'            => $transaction->trx,
+                'lottery'        => $lottery->name,
+                'price'          => showAmount($lottery->price, exceptZeros: true, currencyFormat:false),
+                'total_ticket'   => $ticketCount,
+                'total_price'    => showAmount($totalAmount, currencyFormat:false),
+                'post_balance'   => showAmount($user->balance, currencyFormat:false)
+            ]);
+
+            if (gs('lottery_purchase_commission')) {
+                levelCommission($user, $totalAmount, 'lottery_purchase_commission', $transaction->trx);
+            }
+        } else {
+            return to_route('user.deposit.index', ['user_pick' => encrypt($userPick->id)]);
+        }
+
+        $notify[] = ['success', 'Ticket purchased successfully'];
+        return back()->withNotify($notify);
+    }
+
     public function pick(Request $request, $id)
     {
         $lottery = Lottery::active()->with(['activePhase', 'multiDrawOptions' => function ($query) {
             $query->where('status', Status::ENABLE);
         }])->whereHas('activePhase')->findOrFail($id);
 
-        if($lottery->is_ticket) {
-            $this->pickingTicketValidation($lottery, $request);
-        } else {
-            $this->pickingValidation($lottery, $request);
-        }
+        $this->pickingValidation($lottery, $request);
 
         if ($request->phase_id != @$lottery->activePhase->id) {
             $notify[] = ['error', 'The phase is invalid, please try an active phase'];

@@ -89,7 +89,9 @@ Route::middleware('admin')->group(function () {
     Route::controller('DrawController')->name('draw.')->prefix('draw')->group(function () {
         Route::get('pending', 'pendingDraw')->name('pending');
         Route::get('phase/{id}/select-balls', 'selectBalls')->name('ball.select');
+        Route::get('phase/{id}/select-ticket', 'selectTicket')->name('ball.select_ticket');
         Route::post('preview/{id}', 'preview')->name('preview');
+        Route::post('previewTicket/{id}', 'previewTicket')->name('previewTicket');
         Route::post('submit/{id}', 'submit')->name('submit');
     });
 

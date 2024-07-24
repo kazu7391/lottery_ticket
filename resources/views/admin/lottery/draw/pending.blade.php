@@ -22,7 +22,11 @@
                                         </td>
                                         <td>{{ showDateTime($phase->draw_date, 'd M, Y h:i A') }}</td>
                                         <td>
-                                            <a href="{{ route('admin.draw.ball.select', $phase->id) }}" class="btn btn-sm btn-outline--primary"><i class="las la-money-bill-alt"></i>@lang('Draw Now')</a>
+                                            @if($phase->lottery->is_ticket)
+                                                <a href="{{ route('admin.draw.ball.select_ticket', $phase->id) }}" class="btn btn-sm btn-outline--primary"><i class="las la-money-bill-alt"></i>@lang('Draw Now')</a>
+                                            @else
+                                                <a href="{{ route('admin.draw.ball.select', $phase->id) }}" class="btn btn-sm btn-outline--primary"><i class="las la-money-bill-alt"></i>@lang('Draw Now')</a>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty

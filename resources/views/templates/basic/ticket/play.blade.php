@@ -1,11 +1,5 @@
 @extends($activeTemplate . 'layouts.frontend')
 @section('content')
-    @php
-        $hasMultiDrawOption = false;
-        if ($lottery->has_multi_draw && $lottery->multiDrawOptions->count() > 0) {
-            $hasMultiDrawOption = true;
-        }
-    @endphp
     <div class="ticket-card--container">
         <div class="container">
             <div class="row justify-content-center">
@@ -57,7 +51,7 @@
             <div class="row g-4">
                 <div class="col-xl-3 order-xl-2">
                     <div class="summery-card">
-                        <form action="{{ route('user.lottery.pick', $lottery->id) }}" method="POST">
+                        <form action="{{ route('user.lottery.pickTicket', $lottery->id) }}" method="POST">
                             @csrf
                             <input name="phase_id" type="hidden" value="{{ $lottery->activePhase->id }}">
                             <div class="summery-card__head">
