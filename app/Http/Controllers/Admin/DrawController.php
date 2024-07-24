@@ -16,7 +16,7 @@ class DrawController extends Controller
     public function pendingDraw()
     {
         $pageTitle = 'Pending Draws';
-        $phases    = Phase::active()->winnerNotSet()->whereDate('draw_date', '<=', now())->with('lottery:id,name')->orderBy('draw_date', 'desc')->get();
+        $phases    = Phase::active()->winnerNotSet()->whereDate('draw_date', '<=', now())->with('lottery:id,name,is_ticket')->orderBy('draw_date', 'desc')->get();
         return view('admin.lottery.draw.pending', compact('pageTitle', 'phases'));
     }
 
@@ -239,6 +239,80 @@ class DrawController extends Controller
             if (!$allInRange) {
                 throw ValidationException::withMessages(['error' => 'The winning power balls should be between ' . $lottery->pw_ball_start_from . ' - ' . $maximumPowerBallNumber]);
             }
+        }
+    }
+
+    public function selectTicket($id)
+    {
+        $phase = Phase::active()->winnerNotSet()->whereDate('draw_date', '<=', now())->with('lottery')->findOrFail($id);
+        $pageTitle = 'Draw ' . showPhase($phase->phase_no) . ' of ' . $phase->lottery->name;
+        return view('admin.lottery.draw.select_ticket', compact('pageTitle', 'phase'));
+    }
+
+    public function previewTicket(Request $request, $id)
+    {
+        $phase = Phase::active()->winnerNotSet()->whereDate('draw_date', '<=', now())->with('lottery.winningSettings', 'pickedTickets.userPick.user')->withSum('userPicks as sold_amount', 'amount')->findOrFail($id);
+        $this->validateWinningTicket($request, $phase->lottery);
+
+        $winningSettings = $phase->lottery->winningSettings;
+        $winningNormalBalls = $request->winning_normal_ball;
+
+        $winners = [];
+
+
+        foreach ($phase->pickedTickets as $pickedTicket) {
+            $i = 0;
+            foreach($pickedTicket->normal_balls as $normal_ball) {
+                $numberBallsArr = str_split((string)$normal_ball);
+                $nbExists = array_values(array_intersect($winningNormalBalls, $numberBallsArr));
+                sort($nbExists);
+
+                $totalNBExists = count($nbExists);
+
+                if ($totalNBExists) {
+                    $userPick = $pickedTicket->userPick;
+                    $user = $userPick->user;
+
+                    $winningSetting = @$phase->lottery->winningSettings->where('normal_ball', $totalNBExists)->first();
+
+                    if (!$winningSetting) {
+                        continue;
+                    }
+
+                    $winners[$i]['name']                 =  $user->fullname;
+                    $winners[$i]['normal_balls']         =  $normal_ball;
+                    $winners[$i]['winning_ball']         =  $normal_ball;
+                    $winners[$i]['winning_normal_balls'] =  $nbExists;
+                    $winners[$i]['prize_money']          =  $winningSetting->prize_money ?? 0;
+                    $i++;
+                }
+            }
+        }
+
+        $winningAmount = count($winners) > 0 ? array_sum(array_column($winners, 'prize_money')) : 0;
+        $pageTitle     = 'Preview of ' . $phase->lottery->name . ' ' . showPhase($phase->phase_no) . ' draw';
+        return view('admin.lottery.draw.preview_ticket', compact('pageTitle', 'phase', 'winners', 'winningAmount', 'winningNormalBalls'));
+    }
+
+    public function submitTicket(Request $request, $id)
+    {
+
+    }
+
+    private function setTicketWinners($phase)
+    {
+
+    }
+
+    private function createTicketTransaction($phase)
+    {
+
+    }
+
+    private function validateWinningTicket($request, $lottery)
+    {
+        if (count($request->winning_normal_ball) != $lottery->total_picking_ball) {
+            throw ValidationException::withMessages(['error' => 'Total picking normal ball should be ' . $lottery->total_picking_ball]);
         }
     }
 }

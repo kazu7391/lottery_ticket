@@ -89,6 +89,7 @@ Route::middleware('auth')->name('user.')->group(function () {
             //lottery
             Route::controller('LotteryController')->name('lottery.')->prefix('lottery')->group(function () {
                 Route::post('pick/{id}', 'pick')->name('pick');
+                Route::post('pickTicket/{id}', 'pickTicket')->name('pickTicket');
                 Route::get('purchase/history', 'purchaseHistory')->name('purchase.history');
                 Route::get('pending-draw', 'pendingDraw')->name('draw.pending');
                 Route::get('winning/history', 'winningHistory')->name('winning.history');
