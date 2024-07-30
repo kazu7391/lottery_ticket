@@ -85,6 +85,16 @@ Route::middleware('admin')->group(function () {
         Route::get('phase/all', 'ticketPhases')->name('phase.all');
     });
 
+    // Manage Currencies
+    Route::controller('CurrencyController')->name('currencies.')->prefix('currencies')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('create', 'create')->name('create');
+        Route::get('edit/{id}', 'edit')->name('edit');
+        Route::post('store', 'store')->name('store');
+        Route::post('update/{id}', 'update')->name('update');
+        Route::get('delete/{id}', 'delete')->name('delete');
+    });
+
     //manage draw lottery
     Route::controller('DrawController')->name('draw.')->prefix('draw')->group(function () {
         Route::get('pending', 'pendingDraw')->name('pending');

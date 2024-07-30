@@ -569,6 +569,18 @@
             }
         ]
     },
+    "currencies": {
+        "keyword": [
+            "Currencies",
+            "currencies",
+            "Currency",
+            "currency",
+            "Currency setup"
+        ],
+        "title": "Manage Currency",
+        "icon": "las la-dollar-sign",
+        "route_name": "admin.currencies.index"
+    },
     "system_setting": {
         "keyword": [
             "System Setting",
