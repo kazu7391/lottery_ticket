@@ -15,14 +15,23 @@
                             </div>
                             <div class="col-xl-3 col-sm-6">
                                 <div class="form-group ">
-                                    <label>@lang('Currency')</label>
-                                    <input class="form-control" type="text" name="cur_text" required value="{{ gs('cur_text') }}">
+                                    <label for="frm_cur_text">@lang('Currency')</label>
+                                    <select id="frm_cur_text" class="form-control" required>
+                                        <option value="">-- @lang('Please choose currency') -- </option>
+                                        @foreach($currencies as $currency)
+                                            <option value="{{ $currency->id }}" @if(gs('cur_text') == $currency->currency) selected="selected" @endif>{{ $currency->currency }}</option>
+                                        @endforeach
+                                    </select>
+                                    <input type="hidden" id="hd_cur_text" name="cur_text" value="{{ gs('cur_text') }}" />
                                 </div>
                             </div>
                             <div class="col-xl-3 col-sm-6">
                                 <div class="form-group ">
-                                    <label>@lang('Currency Symbol')</label>
-                                    <input class="form-control" type="text" name="cur_sym" required value="{{ gs('cur_sym') }}">
+                                    <label for="frm_cur_sym">@lang('Currency Symbol')</label>
+                                    <input id="frm_cur_sym" class="form-control" type="text" readonly name="cur_sym" required value="{{ gs('cur_sym') }}">
+                                    @foreach($currencies as $currency)
+                                        <input type="hidden" id="hd_cur_sym_{{ $currency->id }}" value="{{ $currency->symbol }}" />
+                                    @endforeach
                                 </div>
                             </div>
                             <div class="form-group col-xl-3 col-sm-6">
@@ -102,7 +111,6 @@
         (function($) {
             "use strict";
 
-
             $('.colorPicker').spectrum({
                 color: $(this).data('color'),
                 change: function(color) {
@@ -119,6 +127,14 @@
 
             $('[name=cur_text]').on('focusout', function() {
                 $('.welcomeBonus').text($(this).val());
+            });
+
+            $('#frm_cur_text').on('change', function() {
+                let curIdVal = $(this).val();
+                let curText = $(this).find('option:selected').text();
+                $('[name=cur_text]').val(curText);
+                $('[name=cur_sym]').val($('#hd_cur_sym_' + curIdVal).val());
+                $('.welcomeBonus').text(curText);
             });
         })(jQuery);
     </script>

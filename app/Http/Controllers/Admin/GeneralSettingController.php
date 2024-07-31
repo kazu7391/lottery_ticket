@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Constants\Status;
 use App\Http\Controllers\Controller;
+use App\Models\Currency;
 use App\Models\Frontend;
 use App\Rules\FileTypeValidate;
 use Illuminate\Http\Request;
@@ -21,8 +22,9 @@ class GeneralSettingController extends Controller
     {
         $pageTitle = 'General Setting';
         $timezones = timezone_identifiers_list();
+        $currencies = Currency::all();
         $currentTimezone = array_search(config('app.timezone'), $timezones);
-        return view('admin.setting.general', compact('pageTitle', 'timezones', 'currentTimezone'));
+        return view('admin.setting.general', compact('pageTitle', 'timezones', 'currentTimezone', 'currencies'));
     }
 
     public function generalUpdate(Request $request)
