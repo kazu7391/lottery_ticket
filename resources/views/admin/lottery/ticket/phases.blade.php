@@ -43,7 +43,7 @@
                                             <div class="button--group">
                                                 <button @if ($phase->lottery->auto_creation_phase == Status::ENABLE) disabled @endif class="btn btn-sm btn-outline--primary editBtn"
                                                     data-auto_phase="{{ $phase->lottery->auto_creation_phase }}"
-                                                    data-draw_date="{{ showDateTime($phase->draw_date, 'Y-m-d h:i a') }}" data-id="{{ $phase->id }}"
+                                                    data-draw_date="{{ showBasicDateTime($phase->draw_date) }}" data-id="{{ $phase->id }}"
                                                     data-lottery_id="{{ $phase->lottery_id }}" type="button">
                                                     <i class="la la-pencil"></i>@lang('Edit')
                                                 </button>
@@ -179,7 +179,6 @@
                 modal.find('[name=lottery_id]').val(data.lottery_id);
 
                 modal.find('.phase-datePicker').val(data.draw_date);
-                initDateRangePicker(data.draw_date);
 
                 modal.modal('show');
             });

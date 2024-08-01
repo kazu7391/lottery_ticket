@@ -331,6 +331,13 @@ function showDateTime($date, $format = 'Y-m-d h:i A')
     return Carbon::parse($date)->translatedFormat($format);
 }
 
+function showBasicDateTime($date, $format = 'Y-m-d h:i A') {
+    if (!$date) {
+        return '-';
+    }
+
+    return Carbon::parse($date)->format($format);
+}
 
 function getContent($dataKeys, $singleQuery = false, $limit = null, $orderById = false)
 {
