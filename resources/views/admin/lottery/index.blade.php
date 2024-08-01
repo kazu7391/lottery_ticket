@@ -26,7 +26,7 @@
                                             </div>
 
                                         </td>
-                                        <td>{{ showAmount($lottery->price) }}</td>
+                                        <td>{{ number_format($lottery->price, 2) }} {{ $lottery->currency ?? __(gs('cur_text')) }}</td>
                                         <td>
                                             @php
                                                 echo $lottery->statusBadge;

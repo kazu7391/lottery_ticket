@@ -30,7 +30,16 @@
                                             <label>@lang('Price')</label>
                                             <div class="input-group">
                                                 <input class="form-control" name="price" required step="any" type="number" value="{{ $amount > 0 ? getAmount($amount) : '' }}">
-                                                <span class="input-group-text">{{ __(gs('cur_text')) }}</span>
+                                                @if(count($currencies) > 0)
+                                                    <select name="currency" class="input-group-text">
+                                                        @foreach($currencies as $currency)
+                                                        <option @if($currency->currency == @$lottery->currency) selected="selected" @endif value="{{ $currency->currency }}">{{ $currency->currency }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                @else
+                                                    <span class="input-group-text">{{ __(gs('cur_text')) }}</span>
+                                                    <input name="currency" value="{{ __(gs('cur_text')) }}" />
+                                                @endif
                                             </div>
                                         </div>
                                     </div>

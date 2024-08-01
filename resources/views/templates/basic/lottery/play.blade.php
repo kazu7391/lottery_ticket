@@ -21,7 +21,7 @@
                                         {{ __($lottery->name) }}
                                     </h4>
                                     <span class="result-card__sub-title">
-                                        {{  shortNumber($lottery->maxPrize()) }}  {{ gs()->cur_text }}
+                                        {{  shortNumber($lottery->maxPrize()) }}  {{ $lottery->currency ?? gs()->cur_text }}
                                     </span>
                                 </div>
                             </div>

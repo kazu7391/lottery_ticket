@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Constants\Status;
 use App\Http\Controllers\Controller;
+use App\Models\Currency;
 use App\Models\Lottery;
 use App\Models\MultiDrawOption;
 use App\Models\Phase;
@@ -32,7 +33,9 @@ class LotteryController extends Controller
             $pageTitle = 'Create Ticket';
         }
 
-        return view('admin.lottery.ticket.create', compact('pageTitle', 'lottery'));
+        $currencies = Currency::all();
+
+        return view('admin.lottery.ticket.create', compact('pageTitle', 'lottery', 'currencies'));
     }
 
     public function ticketPhases()
@@ -71,6 +74,7 @@ class LotteryController extends Controller
 
         $lottery->name                     = $request->name;
         $lottery->price                    = $request->price;
+        $lottery->currency                 = $request->currency;
         $lottery->no_of_ball               = $request->no_of_ball;
         $lottery->total_picking_ball       = $request->no_of_ball;
         $lottery->is_ticket                = $request->is_ticket;
@@ -175,7 +179,9 @@ class LotteryController extends Controller
             $pageTitle = 'Create Lottery';
         }
 
-        return view('admin.lottery.create', compact('pageTitle', 'lottery'));
+        $currencies = Currency::all();
+
+        return view('admin.lottery.create', compact('pageTitle', 'lottery', 'currencies'));
     }
 
     public function store(Request $request, $id = 0)
@@ -214,6 +220,7 @@ class LotteryController extends Controller
 
         $lottery->name                     = $request->name;
         $lottery->price                    = $request->price;
+        $lottery->currency                 = $request->currency;
         $lottery->line_variations          = $numbers;
         $lottery->is_ticket                = $request->is_ticket;
         $lottery->no_of_ball               = $request->no_of_ball;

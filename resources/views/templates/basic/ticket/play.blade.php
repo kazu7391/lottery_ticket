@@ -15,7 +15,7 @@
                                         {{ __($lottery->name) }}
                                     </h4>
                                     <span class="result-card__sub-title">
-                                        {{  number_format($lottery->maxPrize()) }}  {{ gs()->cur_text }}
+                                        {{  number_format($lottery->maxPrize()) }}  {{ $lottery->currency ?? gs()->cur_text }}
                                     </span>
                                 </div>
                             </div>
